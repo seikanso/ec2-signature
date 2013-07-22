@@ -26,4 +26,4 @@ library
 
 source-repository head
     type:            git
-    location:        git://github.com/yunomu/ec2-signature.git
+    location:        git://github.com/worksap-ate/ec2-signature.git
