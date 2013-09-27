@@ -34,6 +34,10 @@ import qualified Network.HTTP.Types as HTTP
 data QueryString = QueryString { toString :: ByteString }
   deriving (Eq)
 
+instance Monoid QueryString where
+    mempty = QueryString ""
+    mappend a b = QueryString $ toString a <> "&" <> toString b
+
 type Method = ByteString
 type Endpoint = ByteString
 type Path = ByteString
@@ -42,9 +46,8 @@ data SignatureMethod = HmacSHA256
 
 -- | Convert a parameter list to 'QueryString'.
 --
--- ex:
---
--- > queryString [("param1", "value1"), ("param2", "value2)] --> "param1=value1&param2=value2"
+-- >>> toString $ queryString [("param1", "value1"), ("param2", "value2")]
+-- "param1=value1&param2=value2"
 queryString :: [(ByteString, ByteString)] -> QueryString
 queryString = queryString' . sort
 
@@ -63,12 +66,8 @@ queryString' = QueryString . BS.intercalate "&" . map concatWithEqual
 
 -- | Make a string for making signature.
 --
--- ex:
---
--- > GET
--- > ec2.amazonaws.com
--- > /
--- > Action=DescribeInstances&AWSAccessKeyId=xxx&...
+-- >>> stringToSign "GET" "ec2.amazonaws.com" "/" [("key1", "value1"), ("key2", "value2")]
+-- "GET\nec2.amazonaws.com\n/\nkey1=value1&key2=value2"
 stringToSign :: Method -> Endpoint -> Path -> [(ByteString, ByteString)] -> ByteString
 stringToSign method end path = stringToSign' method end path . queryString
 

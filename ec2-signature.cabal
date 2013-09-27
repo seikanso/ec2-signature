@@ -24,6 +24,14 @@ library
                      , SHA
                      , http-types
 
+test-suite doctest
+  type:              exitcode-stdio-1.0
+  hs-source-dirs:    test
+  main-is:           Doctest.hs
+  ghc-options:       -Wall
+  build-depends:       base == 4.*
+                     , doctest
+
 source-repository head
     type:            git
     location:        git://github.com/worksap-ate/ec2-signature.git
