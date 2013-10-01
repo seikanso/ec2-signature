@@ -30,6 +30,10 @@ main :: IO ()
 main = hspec $ do
     describe "QueryString" $ do
         prop "mappend" prop_mappend
+        prop "read" prop_read
 
 prop_mappend :: QueryString -> QueryString -> Bool
 prop_mappend a b = (a <> b) == queryString (rawData a ++ rawData b)
+
+prop_read :: QueryString -> Bool
+prop_read a = read (BC.unpack (toString a)) == a

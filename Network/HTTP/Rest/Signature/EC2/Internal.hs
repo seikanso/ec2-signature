@@ -2,7 +2,7 @@ module Network.HTTP.Rest.Signature.EC2.Internal where
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
-import Data.ByteString.Char8 ()
+import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Base64 as Base64
 import qualified Data.Digest.Pure.SHA as SHA
@@ -29,6 +29,22 @@ merge as [] = as
 merge (a:as) (b:bs)
     | a <= b    = a:merge as (b:bs)
     | otherwise = b:merge (a:as) bs
+
+instance Read QueryString where
+    readsPrec _
+        = maybe [] (\a -> [(a, "")])
+        . parseQuery
+        . BC.pack
+
+parseQuery :: ByteString -> Maybe QueryString
+parseQuery
+    = fmap queryString
+    . sequence
+    . map (t . map (HTTP.urlDecode True) . BC.split '=')
+    . BC.split '&'
+  where
+    t [a, b] = Just (a, b)
+    t _      = Nothing
 
 type Method = ByteString
 type Endpoint = ByteString

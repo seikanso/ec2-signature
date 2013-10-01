@@ -8,6 +8,7 @@ module Network.HTTP.Rest.Signature.EC2
     , SignatureMethod(..)
       -- * Building signature
     , toString
+    , parseQuery
     , queryString
     , queryStringFromMap
     , stringToSign
