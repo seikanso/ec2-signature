@@ -2,60 +2,19 @@ module Network.HTTP.Rest.Signature.EC2.Internal where
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
-import Data.ByteString.Char8 ()
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Base64 as Base64
 import qualified Data.Digest.Pure.SHA as SHA
-import Data.List
-import Data.Map (Map)
-import qualified Data.Map as Map
 import Data.Monoid
 import qualified Network.HTTP.Types as HTTP
 
--- | A query string for HTTP.
---
--- > "param1=value1&param2=value2"
-data QueryString =
-    QueryString { rawData :: [(ByteString, ByteString)] }
-  deriving (Eq)
-
-instance Monoid QueryString where
-    mempty = QueryString []
-    mappend a b = QueryString $ rawData a `merge` rawData b
-
-merge :: Ord a => [a] -> [a] -> [a]
-merge [] bs = bs
-merge as [] = as
-merge (a:as) (b:bs)
-    | a <= b    = a:merge as (b:bs)
-    | otherwise = b:merge (a:as) bs
+import Network.HTTP.QueryString
 
 type Method = ByteString
 type Endpoint = ByteString
 type Path = ByteString
 type SecretKey = ByteString
 data SignatureMethod = HmacSHA256
-
--- | Convert a parameter list to 'QueryString'.
---
--- >>> toString $ queryString [("param1", "value1"), ("param2", "value2")]
--- "param1=value1&param2=value2"
-queryString :: [(ByteString, ByteString)] -> QueryString
-queryString = QueryString . sort
-
--- | Convert a parameter map to 'QueryString'.
-queryStringFromMap :: Map ByteString ByteString -> QueryString
-queryStringFromMap = queryString . Map.toList
-
-toString :: QueryString -> ByteString
-toString = BS.intercalate "&" . map concatWithEqual . rawData
-  where
-    concatWithEqual ("", _)    = error "name is null."
-    concatWithEqual (key, val) = mconcat
-        [ HTTP.urlEncode True key
-        , "="
-        , HTTP.urlEncode True val
-        ]
 
 -- | Make a string for making signature.
 --
