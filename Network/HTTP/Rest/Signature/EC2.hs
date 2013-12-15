@@ -1,8 +1,7 @@
 module Network.HTTP.Rest.Signature.EC2
-    ( -- * Re-exports
-      module Network.HTTP.QueryString
+    ( 
       -- * Types
-    , Method
+      Method
     , Endpoint
     , Path
     , SecretKey
@@ -14,5 +13,4 @@ module Network.HTTP.Rest.Signature.EC2
     , signature'
     ) where
 
-import Network.HTTP.QueryString
 import Network.HTTP.Rest.Signature.EC2.Internal

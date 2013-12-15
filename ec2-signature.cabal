@@ -1,5 +1,5 @@
 name:                ec2-signature
-version:             3.0
+version:             3.1
 synopsis:            The Amazon EC2 style signature calculator.
 description:         The Amazon EC2 style signature calculator.
                      <http://docs.aws.amazon.com/general/latest/gr/signature-version-2.html>
@@ -23,7 +23,6 @@ library
                      , base64-bytestring
                      , SHA
                      , http-types
-                     , http-querystring
 
 test-suite doctest
   type:              exitcode-stdio-1.0
@@ -32,6 +31,21 @@ test-suite doctest
   ghc-options:       -Wall
   build-depends:       base == 4.*
                      , doctest
+
+test-suite spec
+  type:              exitcode-stdio-1.0
+  hs-source-dirs:    ., test
+  main-is:           Spec.hs
+  extensions:        OverloadedStrings
+  ghc-options:       -Wall -fno-warn-unused-do-bind
+  build-depends:       base == 4.*
+                     , bytestring
+                     , base64-bytestring
+                     , SHA
+                     , http-types
+                     , hspec
+                     , HUnit
+                     , QuickCheck
 
 source-repository head
     type:            git

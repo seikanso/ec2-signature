@@ -5,10 +5,10 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Base64 as Base64
 import qualified Data.Digest.Pure.SHA as SHA
+import Data.List (sort)
 import Data.Monoid
 import qualified Network.HTTP.Types as HTTP
-
-import Network.HTTP.QueryString
+import Network.HTTP.Types (Query, SimpleQuery)
 
 type Method = ByteString
 type Endpoint = ByteString
@@ -20,24 +20,27 @@ data SignatureMethod = HmacSHA256
 --
 -- >>> stringToSign "GET" "ec2.amazonaws.com" "/" [("key1", "value1"), ("key2", "value2")]
 -- "GET\nec2.amazonaws.com\n/\nkey1=value1&key2=value2"
-stringToSign :: Method -> Endpoint -> Path -> [(ByteString, ByteString)] -> ByteString
-stringToSign method end path = stringToSign' method end path . queryString
+stringToSign :: Method -> Endpoint -> Path -> SimpleQuery -> ByteString
+stringToSign method end path
+    = stringToSign' method end path
+    . HTTP.simpleQueryToQuery
 
-stringToSign' :: Method -> Endpoint -> Path -> QueryString -> ByteString
-stringToSign' method end path params = BS.intercalate "\n"
+stringToSign' :: Method -> Endpoint -> Path -> Query -> ByteString
+stringToSign' method end path query = BS.intercalate "\n"
     [ method
     , end
     , path
-    , toString params
+    , HTTP.renderQuery False $ sort query
     ]
 
 -- | Make signature from a parameter list.
-signature :: Method -> Endpoint -> Path -> SecretKey -> SignatureMethod -> [(ByteString, ByteString)] -> ByteString
+signature :: Method -> Endpoint -> Path -> SecretKey -> SignatureMethod -> SimpleQuery -> ByteString
 signature method end path secret sigm
-    = signature' method end path secret sigm . queryString
+    = signature' method end path secret sigm
+    . HTTP.simpleQueryToQuery
 
 -- | Make signature from a 'QueryString'.
-signature' :: Method -> Endpoint -> Path -> SecretKey -> SignatureMethod -> QueryString -> ByteString
+signature' :: Method -> Endpoint -> Path -> SecretKey -> SignatureMethod -> Query -> ByteString
 signature' method end path secret sigm params
     = HTTP.urlEncode True
     $ Base64.encode
